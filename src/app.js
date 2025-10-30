@@ -2,33 +2,36 @@ const express = require("express");
 const {authAdmin, authUser} = require("./middlewares/auth")
 const app = express();
 
-app.use("/" , (err, req ,res, next) => {
-   if(err) {
-    // log your error 
-    res.status(500).send("something went wrong")
-  }
-})
+const connectDB = require("./config/database")
 
-app.get("/user",  (req,res) => {
-  try {
+app.post("/signup", async(req,res) => {
+  // Creating the new instance of the User model
+  const user = new User({
+    firstName: "John",
+    lastName: "Cena",
+    emailId: "john@cena.com",
+    password: "john@123",
+  })
 
+  try{
+    await user.save()
+    res.send("User added successfully!")
   } catch (err) {
-    res.status(500).send("some error occurred please contact support team")
-  }
-// logic of DB call and get user data 
-  throw new error("something went wrong")
-  res.send("User logged in successfully")
-}) 
-
-app.use("/" , (err, req ,res, next) => {
-   if(err) {
-    // log your error 
-    res.status(500).send("something went wrong")
+    res.status(400).send("Error adding the user:" + err.message)
   }
 })
 
-app.listen(3000, () => {
+connectDB()
+.then(() => {
+  console.log("Database connection established")
+  app.listen(3000, () => {
   console.log("Server  is successfully listening on port 3000...");
-});
+  });
+})
+.catch((err) => {
+  console.error("Database cannot be connected")
+})
+
+
 
 // Note: Order of writing the routes matter a lot
