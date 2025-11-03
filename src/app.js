@@ -3,18 +3,33 @@ const {authAdmin, authUser} = require("./middlewares/auth")
 const app = express();
 const User = require("./models/user")
 
-const connectDB = require("./config/database")
+const connectDB = require("./config/database");
+const { validateSignUpData } = require("./utils/validation");
 
 app.use(express.json())
 
 app.post("/signup", async(req,res) => {
-  console.log(req.body)
-  const data = req.body
-
-  // Creating the new instance of the User model
-  const user = new User(req.body)
+  // console.log(req.body)
 
   try{
+
+     // Validation of data
+     validateSignUpData(req)
+     const {firstName, lastName, emailId, password} = req.body
+
+       // Encrypt the password
+       const passwordHash = await bcrypt.hash(password, 10)
+       console.log(passwordHash)
+
+  // Creating the new instance of the User model
+  const user = new User({
+    firstName,
+    lastName,
+    emailId,
+    password: passwordHash
+  })
+
+  
     const allowed_details = ["firstName", "lastName", "emailId","password"]
     const isDetailsAllowed = Object.keys(data).every((k) => allowed_details.includes(k))
     if(!isDetailsAllowed){
