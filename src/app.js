@@ -2,6 +2,7 @@ const express = require("express");
 const {authAdmin, authUser} = require("./middlewares/auth")
 const app = express();
 const User = require("./models/user")
+const validator = require("validator")
 
 const connectDB = require("./config/database");
 const { validateSignUpData } = require("./utils/validation");
@@ -39,6 +40,29 @@ app.post("/signup", async(req,res) => {
     res.send("User added successfully!")
   } catch (err) {
     res.status(400).send("Error adding the user:" + err.message)
+  }
+})
+
+app.post("login", async(req,res) => {
+  try {
+    const {emailId, password} = res.body
+    if(!validator.isEmail(emailId)){
+      throw new Error("Email is not valid")
+    }
+
+     const user = await User.findOne({emailId: emailId})
+    if(!user){
+      throw new Error("Invalid credentials")
+    }
+    
+    const isPasswordValid = await bcrypt.compare(password, user.password)
+    if(isPasswordValid){
+      res.send("Logged in successfully")
+    } else {
+      throw new Error("Invalid credentials")
+    }
+  } catch (err) {
+    res.status(400).send("ERROR : " + err.message)
   }
 })
 
