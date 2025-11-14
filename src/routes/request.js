@@ -20,6 +20,21 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async(req, res) 
       return res.status(400).json({message: "User not found"})
     }
 
+    // If there is an existing connection request
+    const existingConnectionRequest = await ConnectionRequest.findOne({
+        $or: [
+          // The request was sent by the current user → another user Example: A → B
+          // {fromUserId: fromUserId, toUserId: toUserId}, //or
+          {fromUserId, toUserId},
+          // The other user already sent a request to the current user Example: B → A
+          {fromUserId: toUserId, toUserId: fromUserId}
+        ]
+      })
+
+      if(existingConnectionRequest){
+        return res.status(400).json({message: "Connection is already exist"})
+      }
+    
     // new instance of ConnectionRequest model
     const connectionRequest = new ConnectionRequest({
       fromUserId,
