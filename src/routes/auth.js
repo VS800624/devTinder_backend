@@ -57,7 +57,7 @@ authRouter.post("/login", async (req,res) => {
         expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
         httpOnly: true,
       });
-      res.send("Logged in successfully!!!");
+      res.json({message: "Logged in successfully!!!", data: user});
     }
   } catch(err) {
   }
