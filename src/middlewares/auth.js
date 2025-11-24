@@ -4,6 +4,12 @@ const User = require("../models/user");
 
 const userAuth = async(req, res, next) => {
   try {
+
+    //  // Skip authentication for preflight OPTIONS request
+    // if (req.method === "OPTIONS") {
+    //   return next();
+    // }
+    
     //   const cookies = req.cookies
     //   const {token} = cookies // or
     const { token } = req.cookies;

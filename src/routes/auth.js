@@ -28,7 +28,7 @@ authRouter.post("/signup", async(req,res) => {
     await user.save()
     res.send("User added successfully")
   } catch (err) {
-    res.status(400).send("ERROR:" + err.message)
+    res.status(400).send("ERROR: " + err.message)
   }
 })
 
@@ -42,15 +42,19 @@ authRouter.post("/login", async (req,res) => {
 
     const user = await User.findOne({emailId : emailId})
     if(!user) {
-      throw new Error("Invalid Credentials")
+      throw new Error("Invalid credentials")
     }
 
     const isPasswordValid = await user.validatePassword(password)
-    if(isPasswordValid){
+    if (!isPasswordValid) {
+      return res.status(400).send("Invalid credentials");
+    }
+
       // Create JWT token
       const  token = await user.getJWT()
       // console.log(token)
 
+       // Set cookie
       // Add the token to cookie and send the response back to the user
       // res.cookie("token", token);
      res.cookie("token", token, {
@@ -58,8 +62,8 @@ authRouter.post("/login", async (req,res) => {
         httpOnly: true,
       });
       res.json({message: "Logged in successfully!!!", user});
-    }
   } catch(err) {
+     res.status(400).json({ message: "ERROR: " + err.message })
   }
 })
 
