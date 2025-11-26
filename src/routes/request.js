@@ -21,7 +21,7 @@ requestRouter.post(
       }
 
       const toUser = await User.findById(toUserId);
-      if (!toUserId) {
+      if (!toUser) {
         return res.status(400).json({ message: "User not found" });
       }
 
@@ -48,12 +48,11 @@ requestRouter.post(
       });
 
       const data = await connectionRequest.save();
-      res.json({
+     res.json({
         message:
           status === "interested"
-            ? req.user.firstName + " is " + status + " in " + toUser.firstName
-            : req.user.firstName + " has " + status + " " + toUser.firstName,
-        // data: data //or
+            ? `${req.user.firstName} is interested in ${toUser.firstName}`
+            : `${req.user.firstName} ignored ${toUser.firstName}`,
         data,
       });
     } catch (err) {
