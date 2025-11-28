@@ -38,10 +38,14 @@ profileRouter.put("/profile/edit", userAuth, async (req,res) => {
   }
 })
 
-profileRouter.patch("/profile/password", userAuth, async(req,res) => {
+profileRouter.post("/profile/password", userAuth, async(req,res) => {
   try {
     const user = req.user
     const {oldPassword, newPassword} = req.body
+    if (oldPassword === newPassword) {
+  return res.status(400).json({ error: "New password cannot be the same as old password" });
+}
+
     // Step:1) Validate the password
     const isPasswordValid = await user.validatePassword(oldPassword)
     if(!isPasswordValid) {
