@@ -34,7 +34,7 @@ authRouter.post("/signup", async(req,res) => {
       });
     res.json({message: "User added successfully" , data: savedUser})
   } catch (err) {
-    res.status(400).send("ERROR: " + err.message)
+    res.status(400).json({message: err.message})
   }
 })
 
@@ -43,17 +43,17 @@ authRouter.post("/login", async (req,res) => {
     const {emailId, password} = req.body
 
     if(!validator.isEmail(emailId)) {
-      throw new Error("Invalid credentials")
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
     const user = await User.findOne({emailId : emailId})
     if(!user) {
-      throw new Error("Invalid credentials")
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
     const isPasswordValid = await user.validatePassword(password)
     if (!isPasswordValid) {
-      return res.status(400).send("Invalid credentials");
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
       // Create JWT token

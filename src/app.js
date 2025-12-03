@@ -8,7 +8,10 @@ const cors = require("cors")
 //  Setup CORS
 app.use(
   cors({
-    origin: "http://localhost:5173",
+     origin: [
+      "http://localhost:5173",
+      "https://devtinder619.netlify.app"
+    ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
   })
