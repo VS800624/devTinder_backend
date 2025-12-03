@@ -17,7 +17,7 @@ const userAuth = async(req, res, next) => {
       return res.status(401).send("Please Login!")
     }
       // validate the token (secret key) and decode and return the payload (the data (_id) you originally stored in the token)
-    const decodedMessage = await jwt.verify(token, "DEV@TINDER$619")
+    const decodedMessage = await jwt.verify(token, process.env.JWT_SECRET)
     const {_id} = decodedMessage 
 
     const user = await User.findById(_id)
