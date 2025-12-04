@@ -28,10 +28,16 @@ authRouter.post("/signup", async(req,res) => {
     const savedUser = await user.save()
     const  token = await savedUser.getJWT()
 
-     res.cookie("token", token, {
-        expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
-        // httpOnly: true,
-      });
+    //  res.cookie("token", token, {
+    //     expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
+    //     // httpOnly: true,
+    //   });
+      res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,        // ✅ REQUIRED for HTTPS (Render)
+      sameSite: "none",    // ✅ REQUIRED for Netlify → Render
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
     res.json({message: "User added successfully" , data: savedUser})
   } catch (err) {
     res.status(400).json({message: err.message})
@@ -63,10 +69,17 @@ authRouter.post("/login", async (req,res) => {
        // Set cookie
       // Add the token to cookie and send the response back to the user
       // res.cookie("token", token);
-     res.cookie("token", token, {
-        expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
-        httpOnly: true,
-      });
+    //  res.cookie("token", token, {
+    //     expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
+    //     httpOnly: true,
+    //   });
+      res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,        // ✅ REQUIRED for HTTPS (Render)
+      sameSite: "none",    // ✅ REQUIRED for Netlify → Render
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
+
       res.json({message: "Logged in successfully!!!", user});
   } catch(err) {
      res.status(400).json({ message: "ERROR: " + err.message })
