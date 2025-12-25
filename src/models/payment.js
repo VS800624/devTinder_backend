@@ -1,4 +1,5 @@
 const { default: mongoose } = require("mongoose");
+const User = require("./user");
 
 
 const paymentSchema = new mongoose.Schema({
