@@ -34,8 +34,8 @@ authRouter.post("/signup", async(req,res) => {
     //   });
       res.cookie("token", token, {
       httpOnly: true,
-      secure: true,        // ✅ REQUIRED for HTTPS (Render)
-      sameSite: "none",    // ✅ REQUIRED for Netlify → Render
+      secure: true,        // REQUIRED for HTTPS (Render)
+      sameSite: "none",    // REQUIRED for Netlify → Render
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
     res.json({message: "User added successfully" , data: savedUser})
@@ -75,8 +75,8 @@ authRouter.post("/login", async (req,res) => {
     //   });
       res.cookie("token", token, {
       httpOnly: true,
-      secure: true,        // ✅ REQUIRED for HTTPS (Render)
-      sameSite: "none",    // ✅ REQUIRED for Netlify → Render
+      secure: true,        // REQUIRED for HTTPS (Render)
+      sameSite: "none",    // REQUIRED for Netlify → Render
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
 
@@ -88,9 +88,16 @@ authRouter.post("/login", async (req,res) => {
 
 authRouter.post("/logout", async(req,res) => {
   res.cookie("token", null, {
-    expires: new Date(Date.now())
+    expires: new Date(Date.now()),
+    httpOnly: true
   })
   res.send("Logout successfully")
 })
 
 module.exports = authRouter
+
+
+// httpOnly → JS cannot access cookie (secure)
+// secure → only HTTPS
+// sameSite: none → frontend & backend on different domains
+// maxAge → cookie expires in 1 day
