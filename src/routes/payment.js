@@ -2,18 +2,24 @@ const express = require("express");
 const paymentRouter = express.Router();
 const razorPayInstance = require("../utils/razorpay");
 const { userAuth } = require("../middlewares/auth");
-const Payment = require("../models/payment")
+const Payment = require("../models/payment");
+const { membershipAmount } = require("../utils/constants");
 paymentRouter.post("/payment/create", userAuth, async (req, res) => {
   try {
+
+    const {membershipType} = req.body
+    const {firstName, lastName, emailId} = req.user
+    
     // this is the code to create order on razorPay , we have initialized our razorpay instance with key 
     const order = await razorPayInstance.orders.create({
-      amount: 50000, //this value is in lower denomination of currency(this is in paisa)
+      amount: membershipAmount[membershipType] * 100, //this value is in lower denomination of currency(this is in paisa)
       currency: "INR",
       receipt: "receipt#1",
       notes: {
-        firstName: "value3",
-        lastName: "value2",
-        memberShip: "silver",
+        firstName,
+        lastName,
+        emailId,
+        memberShip: membershipType,
       },
     }); //this will return a promise and we will create an order
 
