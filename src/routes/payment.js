@@ -23,7 +23,7 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
         firstName,
         lastName,
         emailId,
-        memberShip: membershipType,
+        membershipType: membershipType,
       },
     }); //this will return a promise and we will create an order
 
@@ -48,7 +48,7 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
   }
 });
 
-paymentRouter.post("payment/webhook", async (req, res) => {
+paymentRouter.post("/payment/webhook", async (req, res) => {
   try {
     const webhookSignature = req.header("X-Razorpay-Signature");
     // or const webhookSignature = req.get("X-Razorpay-Signature")
@@ -67,7 +67,7 @@ paymentRouter.post("payment/webhook", async (req, res) => {
     //Update my payment status in DB
     const paymentDetails = req.body.payload.payment.entity
 
-    const payment = await Payment.findOne({orderId: paymentDetails.orderId})
+    const payment = await Payment.findOne({orderId: paymentDetails.order_id})
     payment.status = paymentDetails.status
     await payment.save()
 
