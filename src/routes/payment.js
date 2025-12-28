@@ -53,7 +53,7 @@ paymentRouter.post("/payment/webhook", async (req, res) => {
     const webhookSignature = req.header("X-Razorpay-Signature");
     // or const webhookSignature = req.get("X-Razorpay-Signature")
 
-    // It will validate whether the my webhook is correct or not
+    // It will validate whether  my webhook is correct or not
     const isWebhookValid = validateWebhookSignature(
       JSON.stringify(req.body),
       webhookSignature,
@@ -68,18 +68,42 @@ paymentRouter.post("/payment/webhook", async (req, res) => {
     const paymentDetails = req.body.payload.payment.entity
 
     const payment = await Payment.findOne({orderId: paymentDetails.order_id})
-    payment.status = paymentDetails.status
-    await payment.save()
+
+    if(!payment){
+      return res.status(404).json({message: "Payment not found"})
+    }
+
+    // Handle failed payment
+    const event = res.body.event
+
+    if(event === "payment.failed"){
+      payment.status = "failed"
+      await payment.save()
+      return res.status(200).json({message: "Payment failed recorded"})
+    }
+
+    if(event === "payment.captured"){
+      if(payment.status === "captured"){
+        return res.status(200).json({message: "Already processed"})
+      }
+      payment.status = "captured"
+      await payment.save()
+
+    
+    // payment.status = paymentDetails.status
+    // await payment.save()
 
     const user = await User.findOne({_id: payment.userId})
     user.isPremium = true
     user.membershipType = payment.notes.membershipType
     await user.save()
-     
-    //Update the user as premium
-    
+
     //return success response to razorpay
     res.status(200).json({message: "Webhook received successfully"})
+    }
+    
+    // Ignore the event
+     return res.status(200).json({ message: "Event ignored" });
     
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
