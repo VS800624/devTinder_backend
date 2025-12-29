@@ -60,56 +60,62 @@ paymentRouter.post("/payment/webhook", async (req, res) => {
       process.env.RAZORPAY_WEBHOOK_SECRET
     );
 
-    if(!isWebhookValid){
-      return res.status(400).json({msg: "Webhook signature is invalid"})
+    if (!isWebhookValid) {
+      return res.status(400).json({ msg: "Webhook signature is invalid" });
     }
 
     //Update my payment status in DB
-    const paymentDetails = req.body.payload.payment.entity
+    const paymentDetails = req.body.payload.payment.entity;
 
-    const payment = await Payment.findOne({orderId: paymentDetails.order_id})
-    payment.status = paymentDetails.status
-    await payment.save()
-
-    const user = await User.findOne({_id: payment.userId})
+    const payment = await Payment.findOne({ orderId: paymentDetails.order_id });
 
     if (!payment) {
       return res.status(404).json({ message: "Payment not found" });
-      }
-
-     if (payment.status === "captured") {
-      return res.status(200).json({ message: "Already processed" });
     }
 
-    user.isPremium = true
-    user.membershipType = payment.notes.membershipType
-    await user.save()
-     
-    //Update the user as premium
-    // if(req.body.event === "payment.captured"){
+    const event = req.body.event;
 
-    // }
+    // Handle FAILED payment
+    if (event === "payment.failed") {
+      payment.status = "failed";
+      await payment.save();
 
-    // if(req.body.event === "payment.failed"){}
-    
+      return res.status(200).json({ message: "Payment failed recorded" });
+    }
+
+     // Prevent duplicate webhook processing
+    if (payment.status === "captured") {
+      return res.status(200).json({ message: "Already processed" });
+    }
+    // Update payment
+    payment.status = paymentDetails.status;
+    await payment.save();
+
+    // Upgrade user
+    if (paymentDetails.status === "captured") {
+      const user = await User.findById(payment.userId);
+
+      user.isPremium = true;
+      user.membershipType = payment.notes.membershipType;
+      await user.save();
+    }
+
     //return success response to razorpay
-    res.status(200).json({message: "Webhook received successfully"})
-    
+    res.status(200).json({ message: "Webhook received successfully" });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }
 });
 
-paymentRouter.get("/premium/verify", userAuth, async(req,res) => {
-  const user = req.user.toJSON()
-  if(user.isPremium){
-    return res.json({isPremium: true})
+paymentRouter.get("/premium/verify", userAuth, async (req, res) => {
+  const user = req.user
+  if (user.isPremium) {
+    return res.json({ isPremium: true });
   }
-  return res.json({isPremium: false})
-})
+  return res.json({ isPremium: false });
+});
 
 module.exports = paymentRouter;
-
 
 // paymentRouter.post("/payment/webhook", async (req, res) => {
 //   try {
@@ -152,7 +158,6 @@ module.exports = paymentRouter;
 //       payment.status = "captured"
 //       await payment.save()
 
-    
 //     // payment.status = paymentDetails.status
 //     // await payment.save()
 
@@ -164,10 +169,10 @@ module.exports = paymentRouter;
 //     //return success response to razorpay
 //     res.status(200).json({message: "Webhook received successfully"})
 //     }
-    
+
 //     // Ignore the event
 //      return res.status(200).json({ message: "Event ignored" });
-    
+
 //   } catch (err) {
 //     return res.status(500).json({ success: false, message: err.message });
 //   }

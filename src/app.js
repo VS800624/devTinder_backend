@@ -18,6 +18,12 @@ app.use(
   })
 );
 
+// Razorpay webhook — RAW BODY (must be first)
+app.use(
+  "/payment/webhook",
+  express.raw({ type: "application/json" })
+);
+
 // Handle CORS Preflight requests
 app.options("*", cors());
 
