@@ -55,8 +55,8 @@ paymentRouter.post("/payment/webhook", async (req, res) => {
 
     // It will validate whether  my webhook is correct or not
     const isWebhookValid = validateWebhookSignature(
-      // req.body,
-      JSON.stringify(req.body),
+      req.body,
+      // JSON.stringify(req.body),
       webhookSignature,
       process.env.RAZORPAY_WEBHOOK_SECRET
     );
@@ -113,7 +113,7 @@ paymentRouter.post("/payment/webhook", async (req, res) => {
 });
 
 paymentRouter.get("/premium/verify", userAuth, async (req, res) => {
-  const user = req.user.toJSON()
+  const user = req.user
   if (user.isPremium) {
     return res.json({ isPremium: true });
   }
