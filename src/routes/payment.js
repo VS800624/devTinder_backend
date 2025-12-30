@@ -68,7 +68,7 @@ paymentRouter.post("/payment/webhook",  async (req, res) => {
 
     //Update my payment status in DB
     const paymentDetails = req.body.payload.payment.entity;
-    const body = JSON.parse(req.body.toString());
+    // const body = JSON.parse(req.body.toString());
     // const event = body.event;
     const event = req.body.event;
 
