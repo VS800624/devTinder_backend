@@ -67,6 +67,8 @@ paymentRouter.post("/payment/webhook", async (req, res) => {
 
     //Update my payment status in DB
     const paymentDetails = req.body.payload.payment.entity;
+    const body = JSON.parse(req.body.toString());
+    const event = body.event;
 
     const payment = await Payment.findOne({ orderId: paymentDetails.order_id });
 
@@ -74,7 +76,6 @@ paymentRouter.post("/payment/webhook", async (req, res) => {
       return res.status(404).json({ message: "Payment not found" });
     }
 
-    const event = req.body.event;
 
     // Handle FAILED payment
     if (event === "payment.failed") {
@@ -88,22 +89,20 @@ paymentRouter.post("/payment/webhook", async (req, res) => {
     if (payment.status === "captured") {
       return res.status(200).json({ message: "Already processed" });
     }
-    // Update payment
-    payment.status = paymentDetails.status;
-    await payment.save();
+    
+      if (event === "payment.captured") {
+      // Update payment
+        payment.status = "captured";
+        await payment.save();
+        
+      // Upgrade user
+        const user = await User.findById(payment.userId);
+        if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Upgrade user
-    if (paymentDetails.status === "captured") {
-      const user = await User.findById(payment.userId);
-
-    if (!user) {
-        return res.status(404).json({ message: "User not found" });
-    }
-
-      user.isPremium = true;
-      user.membershipType = payment.notes.membershipType;
-      await user.save();
-    }
+        user.isPremium = true;
+        user.membershipType = payment.notes.membershipType;
+        await user.save();
+      }
 
     //return success response to razorpay
     res.status(200).json({ message: "Webhook received successfully" });
