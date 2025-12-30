@@ -48,15 +48,16 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
   }
 });
 
-paymentRouter.post("/payment/webhook", async (req, res) => {
+// paymentRouter.post("/payment/webhook",   express.raw({ type: "application/json" }),  async (req, res) => {
+paymentRouter.post("/payment/webhook",  async (req, res) => {
   try {
     const webhookSignature = req.header("X-Razorpay-Signature");
     // or const webhookSignature = req.get("X-Razorpay-Signature")
 
     // It will validate whether  my webhook is correct or not
     const isWebhookValid = validateWebhookSignature(
-      req.body,
-      // JSON.stringify(req.body),
+      // req.body,
+      JSON.stringify(req.body),
       webhookSignature,
       process.env.RAZORPAY_WEBHOOK_SECRET
     );
@@ -68,7 +69,8 @@ paymentRouter.post("/payment/webhook", async (req, res) => {
     //Update my payment status in DB
     const paymentDetails = req.body.payload.payment.entity;
     const body = JSON.parse(req.body.toString());
-    const event = body.event;
+    // const event = body.event;
+    const event = req.body.event;
 
     const payment = await Payment.findOne({ orderId: paymentDetails.order_id });
 
@@ -94,7 +96,7 @@ paymentRouter.post("/payment/webhook", async (req, res) => {
       // Update payment
         payment.status = "captured";
         await payment.save();
-        
+
       // Upgrade user
         const user = await User.findById(payment.userId);
         if (!user) return res.status(404).json({ message: "User not found" });
