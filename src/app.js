@@ -4,6 +4,7 @@ const app = express();
 const connectDB = require("./config/database");
 const cookieParser = require("cookie-parser");
 const cors = require("cors")
+const http = require("http")
 
 
 //  Setup CORS
@@ -38,12 +39,16 @@ const  profileRouter = require("./routes/profile")
 const  requestRouter = require("./routes/request");
 const  userRouter = require("./routes/user");
 const paymentRouter = require("./routes/payment");
+const initializeSocket = require("./utils/socket");
 
 app.use("/", authRouter)
 app.use("/", profileRouter)
 app.use("/", requestRouter)
 app.use("/", userRouter)
 app.use("/", paymentRouter)
+
+const server = http.createServer(app)
+initializeSocket(server)
 
 connectDB()
   .then(() => {

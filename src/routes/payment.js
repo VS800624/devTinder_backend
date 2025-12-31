@@ -48,7 +48,6 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
   }
 });
 
-// paymentRouter.post("/payment/webhook",   express.raw({ type: "application/json" }),  async (req, res) => {
 paymentRouter.post("/payment/webhook",  async (req, res) => {
   try {
     const webhookSignature = req.header("X-Razorpay-Signature");
@@ -68,8 +67,6 @@ paymentRouter.post("/payment/webhook",  async (req, res) => {
 
     //Update my payment status in DB
     const paymentDetails = req.body.payload.payment.entity;
-    // const body = JSON.parse(req.body.toString());
-    // const event = body.event;
     const event = req.body.event;
 
     const payment = await Payment.findOne({ orderId: paymentDetails.order_id });
