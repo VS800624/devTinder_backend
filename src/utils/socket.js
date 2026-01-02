@@ -21,7 +21,7 @@ const initializeSocket = (server) => {
   })
 
     //  apply middleware
-  io.use(socketAuthMiddleware)
+  // io.use(socketAuthMiddleware)
   
   io.on("connection", (socket) => {
     // Handle events
