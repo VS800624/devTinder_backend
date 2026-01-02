@@ -1,5 +1,6 @@
-const socket = require("socket.io")
+const socketIO = require("socket.io")
 const crypto = require("crypto")
+const { socketAuthMiddleware } = require("../middlewares/socketAuth")
 
 const getSecretRoomId = (userId, targetUserId) => {
   return crypto
@@ -9,18 +10,22 @@ const getSecretRoomId = (userId, targetUserId) => {
 }
 
 const initializeSocket = (server) => {
-  const io = socket(server, {
+  const io = socketIO(server, {
     cors: {
       origin: [
       "http://localhost:5173",
       "https://devtinder619.netlify.app"
     ], 
+    credentials: true,
     }
   })
 
+    //  apply middleware
+  io.use(socketAuthMiddleware)
+  
   io.on("connection", (socket) => {
     // Handle events
-    socket.on("joinChat", ({firstName, userId, targetUserId}) => {
+    socket.on("joinChat", ({firstName, userId,  targetUserId}) => {
       const roomId = getSecretRoomId(userId, targetUserId)
       console.log(firstName + " joined room : " + roomId)
       socket.join(roomId)
