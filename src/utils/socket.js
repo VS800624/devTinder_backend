@@ -3,6 +3,7 @@ const crypto = require("crypto")
 const { socketAuthMiddleware } = require("../middlewares/socketAuth")
 const Chat = require("../models/chat")
 const { timeStamp } = require("console")
+const ConnectionRequest = require("../models/connectionRequest");
 
 const getSecretRoomId = (userId, targetUserId) => {
   return crypto
@@ -33,11 +34,23 @@ const initializeSocket = (server) => {
       socket.join(roomId)
     })
  
-    socket.on("sendMessage", async ({firstName, userId, targetUserId, text}) => {
+    socket.on("sendMessage", async ({firstName, lastName,  userId, targetUserId, text }) => {
       try{  
         const roomId = getSecretRoomId(userId, targetUserId) 
         console.log(firstName+ " " + text)
 
+        // Check if userId & targetUserId are friends
+        const isFriend = await ConnectionRequest.findOne({
+          $or: [
+            {fromUserId: userId, toUserId: targetUserId, status: "accepted"},
+            {fromUserId: targetUserId, toUserId: userId, status: "accepted"}
+          ]
+        })
+
+        if(!isFriend){
+          throw new Error("You are not connected with this user")
+        }
+        
         // Save messages to the database
         let chat = await Chat.findOne({
           participants: {$all: [userId, targetUserId]}
@@ -56,7 +69,7 @@ const initializeSocket = (server) => {
         })
         await chat.save()
         
-        io.to(roomId).emit("messageReceived",{firstName, text, timeStamp: new Date()})
+        io.to(roomId).emit("messageReceived",{firstName, lastName,  text})
       }catch(err){
         throw new Error("Error in DB")
       }

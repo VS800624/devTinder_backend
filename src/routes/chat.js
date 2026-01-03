@@ -23,7 +23,7 @@ chatRouter.get("/chat/:targetUserId", userAuth,  async(req,res) => {
       })
       await chat.save()
     }
-    res.json({message: "Fetched chat successfully", chat})
+    res.json({message: "Fetched chat successfully", data: chat})
     
   } catch(err){
     req.statusCode(500).json({message: err.message})
