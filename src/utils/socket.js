@@ -1,6 +1,8 @@
 const socketIO = require("socket.io")
 const crypto = require("crypto")
 const { socketAuthMiddleware } = require("../middlewares/socketAuth")
+const Chat = require("../models/chat")
+const { timeStamp } = require("console")
 
 const getSecretRoomId = (userId, targetUserId) => {
   return crypto
@@ -31,10 +33,33 @@ const initializeSocket = (server) => {
       socket.join(roomId)
     })
  
-    socket.on("sendMessage", ({firstName, userId, targetUserId, text}) => {
-      const roomId = getSecretRoomId(userId, targetUserId) 
-      console.log(firstName+ " " + text)
-      io.to(roomId).emit("messageReceived",{firstName, text})
+    socket.on("sendMessage", async ({firstName, userId, targetUserId, text}) => {
+      try{  
+        const roomId = getSecretRoomId(userId, targetUserId) 
+        console.log(firstName+ " " + text)
+
+        // Save messages to the database
+        let chat = await Chat.findOne({
+          participants: {$all: [userId, targetUserId]}
+        })
+
+        if(!chat){
+          chat = new Chat({
+            participants: [userId, targetUserId],
+            messages: []
+          })
+        }
+
+        chat.messages.push({
+          senderId: userId,
+          text
+        })
+        await chat.save()
+        
+        io.to(roomId).emit("messageReceived",{firstName, text, timeStamp: new Date()})
+      }catch(err){
+        throw new Error("Error in DB")
+      }
     })
 
     socket.on("disconnect", () => {
