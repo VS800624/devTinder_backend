@@ -60,7 +60,7 @@ profileRouter.post("/profile/password", userAuth, async(req,res) => {
     await user.save()
     res.send("Password changed successfully")
   }catch(err){
-    res.status(400).json("ERROR: " + err.message )
+    res.status(400).json({ message: err.message} )
   }
 })
 
