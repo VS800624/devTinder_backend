@@ -77,11 +77,6 @@ const userSchema = new mongoose.Schema(
     },
     skills: {
       type: [String],
-      validate(value) {
-        if (value.length < 1) {
-          throw new Error("At least one skill is required");
-        }
-      },
     },
   },
   {
