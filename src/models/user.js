@@ -10,11 +10,14 @@ const userSchema = new mongoose.Schema(
       required: true,
       maxlength: 50,
       minlength: 3,
+      trim: true
     },
     lastName: {
       type: String,
+      required: true,
       maxlength: 50,
       minlength: 3,
+      trim: true
     },
     emailId: {
       type: String,
@@ -31,6 +34,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+      select: false,   //select: false hides password in queries
       minlength: 6,
       validate(value) {
         if (!validator.isStrongPassword(value)) {
@@ -89,6 +93,7 @@ userSchema.index({ firstName: 1, lastName: 1 });
 
 userSchema.methods.getJWT = async function () {
   const user = this;
+  // jwt.sign(payload, secret, options)
   const token = await jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
     expiresIn: "1d",
   });
