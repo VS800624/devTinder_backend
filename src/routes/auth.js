@@ -58,8 +58,8 @@ authRouter.post("/signup", async (req, res) => {
 
 authRouter.post("/login", async (req, res) => {
   try {
-     console.log("LOGIN BODY:", req.body);
-    // const { emailId, password } = req.body;
+    //  console.log("LOGIN BODY:", req.body);
+    const { emailId, password } = req.body;
 
     // Validation:
     if (!validator.isEmail(emailId)) {
