@@ -12,6 +12,7 @@ app.use(
   cors({
      origin: [
       "http://localhost:5173",
+      "http://localhost:5174",
       "https://devtinder619.netlify.app"
     ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],

@@ -60,15 +60,18 @@ authRouter.post("/login", async (req, res) => {
   try {
     const { emailId, password } = req.body;
 
+    // Validation:
     if (!validator.isEmail(emailId)) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
+    // Find the user in DB
     const user = await User.findOne({ emailId: emailId });
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
+    // Password comparison:
     const isPasswordValid = await user.validatePassword(password);
     if (!isPasswordValid) {
       return res.status(400).json({ message: "Invalid credentials" });
@@ -92,8 +95,14 @@ authRouter.post("/login", async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
 
-    res.json({ message: "Logged in successfully!!!", user });
+    const userResponse = savedUser.toObject();
+    delete userResponse.password;
+
+
+    res.json({ message: "Logged in successfully!!!", userResponse });
+
   } catch (err) {
+    console.error("LOGIN ERROR:", err);
     if (err.name === "ValidationError") {
       return res.status(400).json({ message: "ERROR: " + err.message });
     }
