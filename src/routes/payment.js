@@ -18,7 +18,7 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
     const order = await razorPayInstance.orders.create({
       amount: membershipAmount[membershipType] * 100, //this value is in lower denomination of currency(this is in paisa)
       currency: "INR",
-      receipt: "receipt#1",
+      receipt: `receipt_${Date.now()}`,
       notes: {
         firstName,
         lastName,
